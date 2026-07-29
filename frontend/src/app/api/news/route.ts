@@ -24,7 +24,7 @@ async function fetchNews(query: string, lang: string): Promise<any[]> {
       published_at: a.publishedAt?.split('T')[0] || '',
       description: a.description || '',
       image: a.urlToImage,
-    })).filter(a => a.title && a.url)
+    })).filter((a: any) => a.title && a.url)
   } catch {
     return []
   }
