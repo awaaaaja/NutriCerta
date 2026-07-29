@@ -25,13 +25,15 @@ export async function GET(request: NextRequest) {
         apikey: supabaseKey,
         Authorization: `Bearer ${supabaseKey}`,
         Accept: 'application/json',
+        Prefer: 'count=exact',
       },
     })
     if (!res.ok) throw new Error(`Supabase: ${res.status}`)
     const data = await res.json()
-    return NextResponse.json({ data, count: data.length, offset, limit })
+    const total = parseInt(res.headers.get('content-range')?.split('/')[1] || '0', 10)
+    return NextResponse.json({ data, count: data.length, total, offset, limit })
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to fetch foods'
-    return NextResponse.json({ detail: msg, data: [] }, { status: 500 })
+    return NextResponse.json({ detail: msg, data: [], total: 0 }, { status: 500 })
   }
 }

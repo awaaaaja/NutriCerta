@@ -100,7 +100,7 @@ export function bangun_pernyataan(
     {
       rule: info.entity_id,
       source_id: 'IDNT-001',
-      kutipan: `PES: ${kode_pes} — ${info.label} (domain ${info.domain})`,
+      kutipan: `PES: ${kode_pes} - ${info.label} (domain ${info.domain})`,
     },
     {
       rule: 'PAGT-001',

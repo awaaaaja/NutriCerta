@@ -1,0 +1,25 @@
+import { NextRequest, NextResponse } from 'next/server'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string; logId: string }> }) {
+  const { logId } = await params
+  try {
+    const raw = await request.text()
+    const body = JSON.parse(raw)
+    const res = await fetch(`${supabaseUrl}/rest/v1/monitoring_logs?id=eq.${logId}`, {
+      method: 'PATCH',
+      headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) {
+      const errText = await res.text()
+      return NextResponse.json({ detail: 'Supabase error', supabase_error: errText }, { status: 400 })
+    }
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Failed to update monitoring log'
+    return NextResponse.json({ detail: msg }, { status: 400 })
+  }
+}

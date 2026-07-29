@@ -70,7 +70,7 @@ export function rekomendasi_monitoring(
       citations.push({
         rule: key,
         source_id: 'PGRS-001',
-        kutipan: `Monitoring: ${info.parameter} — ${info.frekuensi}`,
+        kutipan: `Monitoring: ${info.parameter} - ${info.frekuensi}`,
       })
     }
   }

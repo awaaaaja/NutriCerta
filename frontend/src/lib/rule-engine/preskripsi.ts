@@ -1,23 +1,23 @@
 import { PreskripsiResult, Citation } from './models'
 
 const DIET_REGISTRY: Record<string, { entity_id: string; deskripsi: string }> = {
-  'DIET-BIASA': { entity_id: 'DIET-BIASA-001', deskripsi: 'Makanan biasa — tekstur normal, nutrisi lengkap' },
-  'DIET-LUNAK': { entity_id: 'DIET-LUNAK-001', deskripsi: 'Makanan lunak — tekstur lunak, mudah cerna' },
-  'DIET-SARING': { entity_id: 'DIET-SARING-001', deskripsi: 'Makanan saring — tekstur halus (blender)' },
-  'DIET-CAIR': { entity_id: 'DIET-CAIR-001', deskripsi: 'Makanan cair — formula enteral/cair bening/penuh' },
-  'DIET-DM': { entity_id: 'DIET-DM-001', deskripsi: 'Diet Diabetes Melitus — rendah gula, tinggi serat' },
-  'DIET-RG': { entity_id: 'DIET-RG-001', deskripsi: 'Diet Rendah Garam — < 1g garam/hari' },
-  'DIET-RP': { entity_id: 'DIET-RP-001', deskripsi: 'Diet Rendah Protein — 0.6-0.8 g/kgBB/hari' },
-  'DIET-RL': { entity_id: 'DIET-RL-001', deskripsi: 'Diet Rendah Lemak — < 20% total energi dari lemak' },
-  'DIET-TP': { entity_id: 'DIET-TP-001', deskripsi: 'Diet Tinggi Protein — > 1.5 g/kgBB/hari' },
-  'DIET-SERAT': { entity_id: 'DIET-SERAT-001', deskripsi: 'Diet Tinggi Serat — > 25 g/hari' },
-  'DIET-RS': { entity_id: 'DIET-RS-001', deskripsi: 'Diet Rendah Serat — < 10 g/hari' },
+  'DIET-BIASA': { entity_id: 'DIET-BIASA-001', deskripsi: 'Makanan biasa - tekstur normal, nutrisi lengkap' },
+  'DIET-LUNAK': { entity_id: 'DIET-LUNAK-001', deskripsi: 'Makanan lunak - tekstur lunak, mudah cerna' },
+  'DIET-SARING': { entity_id: 'DIET-SARING-001', deskripsi: 'Makanan saring - tekstur halus (blender)' },
+  'DIET-CAIR': { entity_id: 'DIET-CAIR-001', deskripsi: 'Makanan cair - formula enteral/cair bening/penuh' },
+  'DIET-DM': { entity_id: 'DIET-DM-001', deskripsi: 'Diet Diabetes Melitus - rendah gula, tinggi serat' },
+  'DIET-RG': { entity_id: 'DIET-RG-001', deskripsi: 'Diet Rendah Garam - < 1g garam/hari' },
+  'DIET-RP': { entity_id: 'DIET-RP-001', deskripsi: 'Diet Rendah Protein - 0.6-0.8 g/kgBB/hari' },
+  'DIET-RL': { entity_id: 'DIET-RL-001', deskripsi: 'Diet Rendah Lemak - < 20% total energi dari lemak' },
+  'DIET-TP': { entity_id: 'DIET-TP-001', deskripsi: 'Diet Tinggi Protein - > 1.5 g/kgBB/hari' },
+  'DIET-SERAT': { entity_id: 'DIET-SERAT-001', deskripsi: 'Diet Tinggi Serat - > 25 g/hari' },
+  'DIET-RS': { entity_id: 'DIET-RS-001', deskripsi: 'Diet Rendah Serat - < 10 g/hari' },
 }
 
 const RUTE_REGISTRY: Record<string, { entity_id: string; deskripsi: string }> = {
-  ORAL: { entity_id: 'RUTE-ORAL-001', deskripsi: 'Rute oral — makanan/minuman via mulut' },
-  NGT: { entity_id: 'RUTE-NGT-001', deskripsi: 'Rute enteral — selang NGT/OGT/PEG' },
-  PARENTERAL: { entity_id: 'RUTE-PARENTERAL-001', deskripsi: 'Rute parenteral — infus/TPN' },
+  ORAL: { entity_id: 'RUTE-ORAL-001', deskripsi: 'Rute oral - makanan/minuman via mulut' },
+  NGT: { entity_id: 'RUTE-NGT-001', deskripsi: 'Rute enteral - selang NGT/OGT/PEG' },
+  PARENTERAL: { entity_id: 'RUTE-PARENTERAL-001', deskripsi: 'Rute parenteral - infus/TPN' },
 }
 
 const DIAGNOSIS_KE_DIET: Record<string, string> = {

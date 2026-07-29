@@ -1,7 +1,7 @@
 import { IMTResult, Citation } from './models'
 
 const SOURCE_ID = 'AKG-001'
-const SOURCE_PASAL = 'Lampiran III — Ambang Batas IMT'
+const SOURCE_PASAL = 'Lampiran III - Ambang Batas IMT'
 const SOURCE_HALAMAN = '30'
 
 function hitung_imt(bb: number, tb: number): number {

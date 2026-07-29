@@ -1,76 +1,109 @@
 import Link from 'next/link'
+import {
+  ClipboardList, Ruler, Zap, Search, Pill, Activity, ArrowRight, LogIn
+} from 'lucide-react'
+
+const features = [
+  { icon: ClipboardList, title: 'Skrining MST', desc: 'Malnutrition Screening Tool -- 2 pertanyaan, threshold >= 2' },
+  { icon: Ruler, title: 'Antropometri IMT', desc: 'Kalkulasi IMT + 5 kategori populasi Indonesia (Asia)' },
+  { icon: Zap, title: 'Kebutuhan Gizi', desc: 'Mifflin-St Jeor + faktor aktivitas + AKG protein 57g' },
+  { icon: Search, title: 'Diagnosis PES', desc: '42 kode PES domain NI/NC/NB -- format Problem-Etiology-Signs' },
+  { icon: Pill, title: 'Preskripsi Diet', desc: '11 jenis diet berdasarkan diagnosis medis & kondisi pasien' },
+  { icon: Activity, title: 'Monitoring', desc: '6 parameter monitoring dengan frekuensi & keterangan' },
+]
+
+const stats = [
+  { value: '1.146', label: 'Item Makanan TKPI' },
+  { value: '1.232', label: 'Entitas Tervalidasi' },
+  { value: '86', label: 'Rule Klinis' },
+  { value: '4', label: 'Sumber Tier 1' },
+]
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold text-sm">NC</div>
-            <span className="font-semibold text-lg text-emerald-900">NutriCerta</span>
-          </div>
-          <nav className="flex gap-4 text-sm">
-            <a href="#features" className="text-gray-600 hover:text-emerald-700">Fitur</a>
-            <a href="#about" className="text-gray-600 hover:text-emerald-700">Tentang</a>
-          </nav>
+    <div className="min-h-screen">
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-12 sm:pb-16 text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs font-medium mb-6">
+          <span className="status-dot bg-[var(--color-primary)]" />
+          Berbasis Standar PAGT Indonesia
         </div>
-      </header>
-
-      <section className="max-w-5xl mx-auto px-4 pt-24 pb-16 text-center">
-        <h1 className="text-4xl font-bold text-emerald-900 mb-4">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--color-foreground)] mb-4 leading-tight">
           Clinical Nutrition Assessment
-          <span className="block text-emerald-600">Berbasis Standar PAGT Indonesia</span>
         </h1>
-        <p className="text-gray-600 max-w-2xl mx-auto mb-8">
+        <p className="text-[var(--color-muted-foreground)] max-w-2xl mx-auto mb-8 text-sm sm:text-base leading-relaxed">
           Sistem pakar gizi klinis untuk skrining MST, asesmen 5 domain, diagnosis PES,
-          kalkulasi kebutuhan energi, preskripsi diet, dan monitoring — semua bersitasi
+          kalkulasi kebutuhan energi, preskripsi diet, dan monitoring -- semua bersitasi
           dari sumber resmi Kemenkes RI.
         </p>
-        <div className="flex gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
-            href="/assess"
-            className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition"
+            href="/login"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:bg-[var(--color-primary-hover)] transition"
           >
-            Mulai Assessment
-          </Link>
-          <Link
-            href="/api-docs"
-            className="px-6 py-3 border border-emerald-200 text-emerald-700 rounded-xl font-medium hover:bg-emerald-50 transition"
-          >
-            API Docs
+            Masuk ke Dashboard
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
 
-      <section id="features" className="max-w-5xl mx-auto px-4 py-16">
-        <h2 className="text-2xl font-bold text-emerald-900 mb-8 text-center">Modul Klinis</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            { icon: '📋', title: 'Skrining MST', desc: 'Malnutrition Screening Tool — 2 pertanyaan, threshold ≥ 2' },
-            { icon: '📏', title: 'Antropometri IMT', desc: 'Kalkulasi IMT + 5 kategori populasi Indonesia (Asia)' },
-            { icon: '⚡', title: 'Kebutuhan Gizi', desc: 'Mifflin-St Jeor + faktor aktivitas + AKG protein 57g' },
-            { icon: '🔍', title: 'Diagnosis PES', desc: '42 kode PES domain NI/NC/NB — format Problem-Etiology-Signs' },
-            { icon: '💊', title: 'Preskripsi Diet', desc: '11 jenis diet berdasarkan diagnosis medis & kondisi pasien' },
-            { icon: '📊', title: 'Monitoring', desc: '6 parameter monitoring dengan frekuensi & keterangan' },
-          ].map((f, i) => (
-            <div key={i} className="bg-white rounded-xl p-6 shadow-sm border border-emerald-100">
-              <div className="text-2xl mb-3">{f.icon}</div>
-              <h3 className="font-semibold text-emerald-900 mb-2">{f.title}</h3>
-              <p className="text-sm text-gray-500">{f.desc}</p>
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-12">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          {stats.map((s) => (
+            <div key={s.label} className="clinical-card text-center py-4 sm:py-6">
+              <div className="text-xl sm:text-2xl font-bold text-[var(--color-primary)]">{s.value}</div>
+              <div className="text-xs text-[var(--color-muted-foreground)] mt-1">{s.label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      <section id="about" className="border-t bg-white py-16">
-        <div className="max-w-3xl mx-auto px-4 text-center text-sm text-gray-500">
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
+        <h2 className="text-xl sm:text-2xl font-bold text-[var(--color-foreground)] mb-6 sm:mb-8 text-center">
+          Modul Klinis
+        </h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {features.map((f) => {
+            const Icon = f.icon
+            return (
+              <div key={f.title} className="clinical-card hover:shadow-md transition">
+                <div className="w-10 h-10 rounded-lg bg-[var(--color-primary-light)] flex items-center justify-center mb-3">
+                  <Icon className="w-5 h-5 text-[var(--color-primary)]" />
+                </div>
+                <h3 className="font-semibold text-[var(--color-foreground)] mb-1">{f.title}</h3>
+                <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] leading-relaxed">{f.desc}</p>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      <section className="border-t border-[var(--color-border)] bg-white py-12 sm:py-16">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-lg font-bold text-[var(--color-foreground)] mb-6">Mulai Sekarang</h2>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:bg-[var(--color-primary-hover)] transition"
+          >
+            <LogIn className="w-4 h-4" /> Masuk ke Dashboard
+          </Link>
+          <p className="mt-4 text-xs text-[var(--color-muted-foreground)]">
+            Login dengan akun Ahli Gizi untuk mengakses semua fitur.
+          </p>
+        </div>
+      </section>
+
+      <section className="border-t border-[var(--color-border)] bg-white py-12 sm:py-16">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center text-xs sm:text-sm text-[var(--color-muted-foreground)]">
           <p className="mb-4">
-            <strong className="text-gray-700">Sumber data:</strong> Permenkes AKG No. 28/2019, PGRS No. 78/2013,
+            <strong className="text-[var(--color-foreground)]">Sumber data:</strong> Permenkes AKG No. 28/2019, PGRS No. 78/2013,
             PAGT 2014, TKPI 2018, IDNT/NCPT, SNARS 2024.
           </p>
           <p>
-            1.146 item makanan real dari TKPI Kemenkes RI &bull; 1.232 entitas tervalidasi Ahli Gizi
-            &bull; 86 rule klinis berbasis sumber Tier 1
+            {stats[0].value} item makanan real dari TKPI Kemenkes RI
+            <span className="mx-2 text-[var(--color-border)]">|</span>
+            {stats[1].label}
+            <span className="mx-2 text-[var(--color-border)]">|</span>
+            {stats[2].value} rule klinis berbasis sumber Tier 1
           </p>
         </div>
       </section>
