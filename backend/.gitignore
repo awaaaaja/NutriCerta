@@ -15,3 +15,5 @@ venv/
 # ide
 .vscode/
 .idea/
+
+.vercel
