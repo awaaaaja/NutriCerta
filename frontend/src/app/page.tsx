@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import {
   ClipboardList, Ruler, Zap, Search, Pill, Activity, ArrowRight,
@@ -85,32 +85,9 @@ function AnimatedStat({ icon: Icon, value, suffix, label, desc, delay }: {
   )
 }
 
-function useScrollReveal() {
-  useEffect(() => {
-    const els = document.querySelectorAll('[data-reveal]')
-    if (!els.length) return
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-fade-in-up')
-            observer.unobserve(entry.target)
-          }
-        })
-      },
-      { threshold: 0.05 }
-    )
-    els.forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
-  }, [])
-}
-
 export default function Home() {
-  const [heroLoaded, setHeroLoaded] = useState(false)
   const [heroIndex, setHeroIndex] = useState(0)
   const [news, setNews] = useState<any[] | null>(null)
-
-  useScrollReveal()
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -122,8 +99,6 @@ export default function Home() {
   useEffect(() => {
     fetch('/api/news').then(r => r.json()).then(setNews).catch(() => {})
   }, [])
-
-  const heroBg = heroImages[heroIndex]
 
   return (
     <div className="min-h-screen">
@@ -198,7 +173,7 @@ export default function Home() {
 
       {/* Trusted */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
-        <div className="text-center mb-10" data-reveal style={{ opacity: 0 }}>
+        <div className="text-center mb-10 animate-fade-in-up stagger-1">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs font-medium mb-4">
             <Shield className="w-3 h-3" />
             Berstandar & Tervalidasi
@@ -211,7 +186,7 @@ export default function Home() {
             dan standar profesi dietisien Indonesia.
           </p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-reveal style={{ opacity: 0 }}>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-fade-in-up stagger-2">
           {[
             { initials: 'AKG', name: 'Permenkes No. 28/2019', desc: 'Angka Kecukupan Gizi' },
             { initials: 'PGRS', name: 'Permenkes No. 78/2013', desc: 'Pedoman Gizi RS' },
@@ -230,7 +205,7 @@ export default function Home() {
       {/* Features */}
       <section id="features" className="bg-white border-y border-[var(--color-border)] py-16 sm:py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12" data-reveal style={{ opacity: 0 }}>
+          <div className="text-center mb-12 animate-fade-in-up stagger-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs font-medium mb-4">
               <ClipboardList className="w-3 h-3" />
               Modul Klinis PAGT
@@ -249,9 +224,8 @@ export default function Home() {
               return (
                 <div
                   key={f.title}
-                  className="group relative bg-white rounded-2xl border border-[var(--color-border)] p-6 hover:shadow-xl hover:border-transparent transition-all duration-500"
-                  data-reveal
-                  style={{ opacity: 0, animationDelay: `${i * 100}ms` }}
+                  className="group relative bg-white rounded-2xl border border-[var(--color-border)] p-6 hover:shadow-xl hover:border-transparent transition-all duration-500 animate-fade-in-up"
+                  style={{ animationDelay: `${i * 100}ms` }}
                 >
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white via-white to-[var(--color-primary-light)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                   <div className="relative z-[1]">
@@ -271,7 +245,7 @@ export default function Home() {
       {/* News */}
       <section className="py-16 sm:py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12" data-reveal style={{ opacity: 0 }}>
+          <div className="text-center mb-12 animate-fade-in-up stagger-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs font-medium mb-4">
               <Newspaper className="w-3 h-3" />
               Berita & Artikel Gizi
@@ -296,9 +270,8 @@ export default function Home() {
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group block bg-white rounded-2xl border border-[var(--color-border)] p-5 hover:shadow-lg hover:border-[var(--color-primary)]/30 transition-all duration-300"
-                  data-reveal
-                  style={{ opacity: 0, animationDelay: `${i * 80}ms` }}
+                  className="group block bg-white rounded-2xl border border-[var(--color-border)] p-5 hover:shadow-lg hover:border-[var(--color-primary)]/30 transition-all duration-300 animate-fade-in-up"
+                  style={{ animationDelay: `${i * 80}ms` }}
                 >
                   <div className="flex items-center gap-2 text-xs text-[var(--color-muted-foreground)] mb-3">
                     <span className="px-2 py-0.5 rounded-full bg-[var(--color-muted)] font-medium">{item.source || 'Sumber'}</span>
@@ -324,7 +297,7 @@ export default function Home() {
 
       {/* CTA */}
       <section className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] py-16 sm:py-24">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center" data-reveal style={{ opacity: 0 }}>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center animate-fade-in-up stagger-2">
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
             Siap Mengoptimalkan Asuhan Gizi Pasien?
           </h2>
