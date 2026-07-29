@@ -1,0 +1,39 @@
+# Environment
+.env*
+!.env.example
+
+# Node
+node_modules/
+.next/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.so
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ML data (downloaded separately)
+ml/data/raw/
+ml/data/processed/
+
+# Knowledge raw docs (large PDFs)
+knowledge/raw_documents/*.pdf
+
+# Logs
+*.log
+AGENT_LOG.md
