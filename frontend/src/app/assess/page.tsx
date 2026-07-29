@@ -4,6 +4,65 @@ import { useState } from 'react'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backend-nutricerta.vercel.app'
 
+type FormEvent = React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+
+function Input({ label, name, value, onChange, type = 'text', step, placeholder }: {
+  label: string; name: string; value: string | number; onChange: (e: FormEvent) => void;
+  type?: string; step?: string; placeholder?: string
+}) {
+  return (
+    <div>
+      <label className="block text-xs text-gray-500 mb-1">{label}</label>
+      <input
+        name={name}
+        value={value}
+        onChange={onChange}
+        type={type}
+        step={step}
+        placeholder={placeholder}
+        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+      />
+    </div>
+  )
+}
+
+function Select({ label, name, value, onChange, options }: {
+  label: string; name: string; value: string | number; onChange: (e: FormEvent) => void;
+  options: { label: string; value: string }[]
+}) {
+  return (
+    <div>
+      <label className="block text-xs text-gray-500 mb-1">{label}</label>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
+function ResultCard({ title, items }: { title: string; items: [string, string][] }) {
+  return (
+    <div className="bg-white rounded-xl p-6 shadow-sm border">
+      <h3 className="font-semibold text-emerald-800 mb-3">{title}</h3>
+      <div className="space-y-2 text-sm">
+        {items.map(([k, v], i) => (
+          <div key={i} className="flex justify-between">
+            <span className="text-gray-500">{k}</span>
+            <span className="font-medium text-gray-800">{v}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function AssessPage() {
   const [form, setForm] = useState({
     usia: 45,
@@ -73,10 +132,14 @@ export default function AssessPage() {
             <h2 className="font-semibold text-emerald-800">Data Pasien</h2>
             <div className="grid grid-cols-2 gap-4">
               <Input label="Usia (tahun)" name="usia" value={form.usia} onChange={handleChange} type="number" />
-              <Select label="Jenis Kelamin" name="jenis_kelamin" value={form.jenis_kelamin} onChange={handleChange} options={['pria', 'wanita']} />
+              <Select label="Jenis Kelamin" name="jenis_kelamin" value={form.jenis_kelamin} onChange={handleChange} options={[{ label: 'Pria', value: 'pria' }, { label: 'Wanita', value: 'wanita' }]} />
               <Input label="BB (kg)" name="bb" value={form.bb} onChange={handleChange} type="number" />
               <Input label="TB (cm)" name="tb" value={form.tb} onChange={handleChange} type="number" />
-              <Select label="Aktivitas" name="tingkat_aktivitas" value={form.tingkat_aktivitas} onChange={handleChange} options={['TB', 'RINGAN', 'SEDANG']} />
+              <Select label="Aktivitas" name="tingkat_aktivitas" value={form.tingkat_aktivitas} onChange={handleChange} options={[
+                { label: 'TB (Bed Rest)', value: 'TB' },
+                { label: 'Ringan', value: 'RINGAN' },
+                { label: 'Sedang', value: 'SEDANG' },
+              ]} />
             </div>
           </div>
 
@@ -86,7 +149,7 @@ export default function AssessPage() {
               label="Q1: Penurunan BB?"
               name="mst_penurunan_bb"
               value={String(form.mst_penurunan_bb)}
-              onChange={(e: any) => setForm({...form, mst_penurunan_bb: e.target.value})}
+              onChange={handleChange}
               options={[
                 { label: 'Tidak diisi', value: '' },
                 { label: 'Tidak yakin (skor 2)', value: '2' },
@@ -100,7 +163,7 @@ export default function AssessPage() {
               label="Q2: Nafsu makan menurun?"
               name="mst_nafsu_makan"
               value={String(form.mst_nafsu_makan)}
-              onChange={(e) => setForm({...form, mst_nafsu_makan: e.target.value})}
+              onChange={handleChange}
               options={[
                 { label: 'Tidak diisi', value: '' },
                 { label: 'Tidak (skor 0)', value: '0' },
@@ -228,55 +291,4 @@ export default function AssessPage() {
   )
 }
 
-function Input({ label, name, value, onChange, type = 'text', step, placeholder }: any) {
-  return (
-    <div>
-      <label className="block text-xs text-gray-500 mb-1">{label}</label>
-      <input
-        name={name}
-        value={value}
-        onChange={onChange}
-        type={type}
-        step={step}
-        placeholder={placeholder}
-        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-      />
-    </div>
-  )
-}
 
-function Select({ label, name, value, onChange, options }: any) {
-  return (
-    <div>
-      <label className="block text-xs text-gray-500 mb-1">{label}</label>
-      <select
-        name={name}
-        value={value}
-        onChange={onChange}
-        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
-      >
-        {options.map((opt: any) => {
-          const optValue = typeof opt === 'string' ? opt : opt.value
-          const optLabel = typeof opt === 'string' ? opt : opt.label
-          return <option key={optValue} value={optValue}>{optLabel}</option>
-        })}
-      </select>
-    </div>
-  )
-}
-
-function ResultCard({ title, items }: { title: string; items: [string, string][] }) {
-  return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border">
-      <h3 className="font-semibold text-emerald-800 mb-3">{title}</h3>
-      <div className="space-y-2 text-sm">
-        {items.map(([k, v], i) => (
-          <div key={i} className="flex justify-between">
-            <span className="text-gray-500">{k}</span>
-            <span className="font-medium text-gray-800">{v}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
