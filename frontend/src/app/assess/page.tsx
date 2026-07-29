@@ -86,7 +86,7 @@ export default function AssessPage() {
               label="Q1: Penurunan BB?"
               name="mst_penurunan_bb"
               value={String(form.mst_penurunan_bb)}
-              onChange={(e) => setForm({...form, mst_penurunan_bb: e.target.value})}
+              onChange={(e: any) => setForm({...form, mst_penurunan_bb: e.target.value})}
               options={[
                 { label: 'Tidak diisi', value: '' },
                 { label: 'Tidak yakin (skor 2)', value: '2' },
