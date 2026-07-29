@@ -38,7 +38,7 @@ export default function ApiDocsPage() {
           </pre>
         </Section>
 
-        <Section title="Response Assessment">
+        <Section title="Response Assessment" subtitle="Format output dari POST /api/assess">
           <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-xs">
 {`{
   "skrining": { "skor": 4, "kategori": "RISIKO", ... },
