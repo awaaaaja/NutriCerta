@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-
 type FoodItem = {
   entity_id: string
   nama: string
@@ -26,7 +24,7 @@ export default function FoodsPage() {
   const [selectedItem, setSelectedItem] = useState<FoodItem | null>(null)
 
   useEffect(() => {
-    fetch(`${API_URL}/api/foods/kelompok/list`)
+    fetch('/api/foods/kelompok/list')
       .then(r => r.json())
       .then(d => setKelompokList(d.kelompok || []))
       .catch(() => {})
@@ -38,7 +36,7 @@ export default function FoodsPage() {
       const params = new URLSearchParams({ limit: '50' })
       if (search) params.set('search', search)
       if (selectedKelompok) params.set('kelompok', selectedKelompok)
-      const res = await fetch(`${API_URL}/api/foods?${params}`)
+      const res = await fetch(`/api/foods?${params}`)
       const data = await res.json()
       setItems(data.data || [])
     } catch { setItems([]) }

@@ -2,8 +2,6 @@
 
 import { useState } from 'react'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backend-nutricerta.vercel.app'
-
 type FormEvent = React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
 
 function Input({ label, name, value, onChange, type = 'text', step, placeholder }: {
@@ -108,7 +106,7 @@ export default function AssessPage() {
     if (form.gds !== '') body.gds = Number(form.gds)
 
     try {
-      const res = await fetch(`${API_URL}/api/assess/public`, {
+      const res = await fetch('/api/assess/public', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

@@ -2,8 +2,6 @@
 
 import { useState } from 'react'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-
 export default function LoginPage() {
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
@@ -20,7 +18,7 @@ export default function LoginPage() {
 
     try {
       const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register'
-      const res = await fetch(`${API_URL}${endpoint}`, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
