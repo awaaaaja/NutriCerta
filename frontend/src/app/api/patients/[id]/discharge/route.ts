@@ -34,6 +34,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         monitoring_lanjutan: body.monitoring_lanjutan || null,
         kontrol_tanggal: body.kontrol_tanggal || null,
         catatan: body.catatan || null,
+        created_by: body.created_by || null,
+        updated_at: new Date().toISOString(),
       }),
     })
     if (!res.ok) {

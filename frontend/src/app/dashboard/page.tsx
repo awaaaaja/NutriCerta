@@ -32,7 +32,7 @@ export default function DashboardPage() {
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
     no_rm: '', nama: '', tanggal_lahir: '', jenis_kelamin: 'pria' as string,
-    ruangan: '', diagnosis_masuk: '',
+    ruangan: '', diagnosis_masuk: '', bb: '', tb: '',
   })
   const [formError, setFormError] = useState('')
 
@@ -271,6 +271,23 @@ export default function DashboardPage() {
             onChange={(e) => setForm({ ...form, diagnosis_masuk: e.target.value })}
             placeholder="DM Tipe 2, Hipertensi, dll"
           />
+          <div className="grid grid-cols-2 gap-3">
+            <Input label="BB (kg)" type="number" step="0.1" value={form.bb} onChange={e => setForm({...form, bb: e.target.value})} placeholder="Berat badan" />
+            <Input label="TB (cm)" type="number" step="0.1" value={form.tb} onChange={e => setForm({...form, tb: e.target.value})} placeholder="Tinggi badan" />
+          </div>
+          {form.bb && form.tb && Number(form.tb) > 0 && (
+            <div className="p-2 rounded-lg bg-[var(--color-primary-light)] text-xs text-[var(--color-primary)]">
+              IMT: {(Number(form.bb) / ((Number(form.tb) / 100) ** 2)).toFixed(1)}
+              {' — '}
+              {(() => {
+                const imt = Number(form.bb) / ((Number(form.tb) / 100) ** 2)
+                if (imt < 18.5) return 'Kurus'
+                if (imt < 25) return 'Normal'
+                if (imt < 30) return 'Gemuk'
+                return 'Obesitas'
+              })()}
+            </div>
+          )}
           {formError && (
             <div className="p-3 rounded-lg bg-[var(--color-destructive-light)] text-[var(--color-destructive)] text-xs">{formError}</div>
           )}

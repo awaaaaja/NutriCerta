@@ -51,6 +51,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ detail: 'JSON tidak valid', received: bodyText.substring(0, 500) }, { status: 400 })
     }
 
+    const bb = body.bb ? Number(body.bb) : null
+    const tb = body.tb ? Number(body.tb) : null
+    let imt: number | null = null
+    let imt_kategori: string | null = null
+    if (bb && tb && tb > 0) {
+      const tbM = tb / 100
+      imt = Math.round((bb / (tbM * tbM)) * 10) / 10
+      if (imt < 18.5) imt_kategori = 'KURUS'
+      else if (imt < 25) imt_kategori = 'NORMAL'
+      else if (imt < 30) imt_kategori = 'GEMUK'
+      else imt_kategori = 'OBESITAS'
+    }
+
     const res = await fetch(`${supabaseUrl}/rest/v1/patients`, {
       method: 'POST',
       headers: {
@@ -67,6 +80,10 @@ export async function POST(request: NextRequest) {
         ruangan: body.ruangan || null,
         diagnosis_masuk: body.diagnosis_masuk || null,
         tgl_masuk: body.tgl_masuk || new Date().toISOString().split('T')[0],
+        bb: bb,
+        tb: tb,
+        imt: imt,
+        imt_kategori: imt_kategori,
         status_pagt: 'BARU_MASUK',
         created_by: body.created_by || null,
       }),

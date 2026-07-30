@@ -29,6 +29,7 @@ type Patient = {
   id: string; no_rm: string; nama: string; tanggal_lahir: string
   jenis_kelamin: string; ruangan: string; diagnosis_masuk: string
   tgl_masuk: string; status_pagt: string
+  bb: number | null; tb: number | null; imt: number | null; imt_kategori: string | null
 }
 
 type Screening = {
@@ -161,6 +162,8 @@ export default function PatientDetailPage() {
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-foreground)]">{patient.nama}</h1>
             <p className="text-sm text-[var(--color-muted-foreground)]">
               RM {patient.no_rm} | {patient.ruangan || '-'} | {patient.jenis_kelamin === 'pria' ? 'L' : 'P'}
+              {patient.bb != null && patient.tb != null ? ` | BB ${patient.bb} kg, TB ${patient.tb} cm` : ''}
+              {patient.imt != null ? ` | IMT ${patient.imt}` : ''}
             </p>
           </div>
         </div>
@@ -225,7 +228,12 @@ export default function PatientDetailPage() {
           }}
         />
       )}
-      {tab === 'diagnosis' && <DiagnosisTab diagnoses={diagnoses} pid={pid} userId={userId} onCreated={() => fetch(`/api/patients/${pid}/diagnoses`).then(r => r.json()).then(d => setDiagnoses(d.data || []))} />}
+      {tab === 'diagnosis' && <DiagnosisTab diagnoses={diagnoses} pid={pid} userId={userId} onCreated={() => {
+        Promise.all([
+          fetch(`/api/patients/${pid}/diagnoses`).then(r => r.json()),
+          fetch(`/api/patients/${pid}`).then(r => r.json()),
+        ]).then(([d, p]) => { setDiagnoses(d.data || []); setPatient(p) })
+      }} />}
       {tab === 'intervensi' && (
         <IntervensiTab
           interventions={interventions}
@@ -233,12 +241,25 @@ export default function PatientDetailPage() {
           pid={pid}
           onCreated={() => {
             setShowIntervensiModal(false)
-            fetch(`/api/patients/${pid}/interventions`).then(r => r.json()).then(d => setInterventions(d.data || []))
+            Promise.all([
+              fetch(`/api/patients/${pid}/interventions`).then(r => r.json()),
+              fetch(`/api/patients/${pid}`).then(r => r.json()),
+            ]).then(([d, p]) => { setInterventions(d.data || []); setPatient(p) })
           }}
         />
       )}
-      {tab === 'monitoring' && <MonitoringTab monitoring={monitoring} pid={pid} userId={userId} onCreated={() => fetch(`/api/patients/${pid}/monitoring`).then(r => r.json()).then(d => setMonitoring(d.data || []))} />}
-      {tab === 'discharge' && <DischargeTab discharge={discharge} pid={pid} userId={userId} onCreated={() => fetch(`/api/patients/${pid}/discharge`).then(r => r.json().then(d => setDischarge(d?.id ? d : null)).catch(() => {}))} />}
+      {tab === 'monitoring' && <MonitoringTab monitoring={monitoring} pid={pid} userId={userId} onCreated={() => {
+        Promise.all([
+          fetch(`/api/patients/${pid}/monitoring`).then(r => r.json()),
+          fetch(`/api/patients/${pid}`).then(r => r.json()),
+        ]).then(([m, p]) => { setMonitoring(m.data || []); setPatient(p) })
+      }} />}
+      {tab === 'discharge' && <DischargeTab discharge={discharge} pid={pid} userId={userId} onCreated={() => {
+        Promise.all([
+          fetch(`/api/patients/${pid}/discharge`).then(r => r.json().then(d => setDischarge(d?.id ? d : null)).catch(() => {})),
+          fetch(`/api/patients/${pid}`).then(r => r.json()),
+        ]).then(([_, p]) => setPatient(p))
+      }} />}
       {tab === 'riwayat' && <RiwayatTab pid={pid} />}
 
       <ScreeningModal open={showScreeningModal} onClose={() => setShowScreeningModal(false)} pid={pid} userId={userId} onSuccess={() => {
@@ -412,6 +433,7 @@ function DiagnosisTab({ diagnoses, pid, userId, onCreated }: { diagnoses: Diagno
   const [form, setForm] = useState({ kode_pes: '', pernyataan_pes: '', domain: 'NI', etiologi: '', signs: '' })
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
+  const [assessmentId, setAssessmentId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!showModal) return
@@ -419,15 +441,18 @@ function DiagnosisTab({ diagnoses, pid, userId, onCreated }: { diagnoses: Diagno
       .then(r => r.json())
       .then(d => {
         const last = d.data?.[0] || null
-        if (last) setForm(f => ({
-          ...f,
-          signs: [
-            last.asupan_persen ? `asupan ${last.asupan_persen}%` : '',
-            last.albumin ? `albumin ${last.albumin}` : '',
-            last.gds ? `GDS ${last.gds}` : '',
-            last.imt ? `IMT ${last.imt}` : '',
-          ].filter(Boolean).join('; '),
-        }))
+        if (last) {
+          setAssessmentId(last.id)
+          setForm(f => ({
+            ...f,
+            signs: [
+              last.asupan_persen ? `asupan ${last.asupan_persen}%` : '',
+              last.albumin ? `albumin ${last.albumin}` : '',
+              last.gds ? `GDS ${last.gds}` : '',
+              last.imt ? `IMT ${last.imt}` : '',
+            ].filter(Boolean).join('; '),
+          }))
+        }
       })
       .catch(() => {})
   }, [showModal])
@@ -439,10 +464,10 @@ function DiagnosisTab({ diagnoses, pid, userId, onCreated }: { diagnoses: Diagno
     try {
       const res = await fetch(`/api/patients/${pid}/diagnoses`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, created_by: userId }),
+        body: JSON.stringify({ ...form, assessment_id: assessmentId, created_by: userId }),
       })
       if (!res.ok) throw new Error((await res.json()).detail || 'Gagal')
-      setShowModal(false); setForm({ kode_pes: '', pernyataan_pes: '', domain: 'NI', etiologi: '', signs: '' })
+      setShowModal(false); setForm({ kode_pes: '', pernyataan_pes: '', domain: 'NI', etiologi: '', signs: '' }); setAssessmentId(null)
       onCreated()
     } catch (e: any) { setErr(e.message) }
     finally { setSaving(false) }
@@ -847,20 +872,23 @@ function IntervensiModal({ open, onClose, pid, userId, onSuccess }: { open: bool
   })
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
+  const [diagnosisId, setDiagnosisId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open) return
-    fetch(`/api/patients/${pid}/assessments?limit=1`)
-      .then(r => r.json())
-      .then(d => {
-        const last = d.data?.[0] || null
-        if (last) setForm(f => ({
-          ...f,
-          target_energi: last.tee ? String(Math.round(last.tee)) : f.target_energi,
-          target_protein: last.protein_gram ? String(Math.round(last.protein_gram)) : f.target_protein,
-        }))
-      })
-      .catch(() => {})
+    Promise.all([
+      fetch(`/api/patients/${pid}/assessments?limit=1`).then(r => r.json()),
+      fetch(`/api/patients/${pid}/diagnoses`).then(r => r.json()),
+    ]).then(([aRes, dRes]) => {
+      const last = aRes.data?.[0] || null
+      if (last) setForm(f => ({
+        ...f,
+        target_energi: last.tee ? String(Math.round(last.tee)) : f.target_energi,
+        target_protein: last.protein_gram ? String(Math.round(last.protein_gram)) : f.target_protein,
+      }))
+      const activeDx = (dRes.data || []).find((dx: Diagnosis) => dx.status === 'active')
+      if (activeDx) setDiagnosisId(activeDx.id)
+    }).catch(() => {})
   }, [open])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -871,13 +899,14 @@ function IntervensiModal({ open, onClose, pid, userId, onSuccess }: { open: bool
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
+          diagnosis_id: diagnosisId,
           target_energi: form.target_energi ? Number(form.target_energi) : null,
           target_protein: form.target_protein ? Number(form.target_protein) : null,
           created_by: userId,
         }),
       })
       if (!res.ok) throw new Error((await res.json()).detail || 'Gagal')
-      setForm({ jenis_diet: '', rute_pemberian: 'ORAL', target_energi: '', target_protein: '', tujuan_intervensi: '', alergi: '', edukasi: '', alasan_revisi: '' })
+      setForm({ jenis_diet: '', rute_pemberian: 'ORAL', target_energi: '', target_protein: '', tujuan_intervensi: '', alergi: '', edukasi: '', alasan_revisi: '' }); setDiagnosisId(null)
       onSuccess()
     } catch (e: any) { setErr(e.message) }
     finally { setSaving(false) }
@@ -942,8 +971,8 @@ function AssessmentModal({ open, onClose, pid, userId, onSuccess }: { open: bool
       setForm(f => ({
         ...f,
         usia: patient?.usia ? String(patient.usia) : f.usia,
-        bb: prev?.bb ? String(prev.bb) : f.bb,
-        tb: prev?.tb ? String(prev.tb) : f.tb,
+        bb: patient?.bb ? String(patient.bb) : prev?.bb ? String(prev.bb) : f.bb,
+        tb: patient?.tb ? String(patient.tb) : prev?.tb ? String(prev.tb) : f.tb,
         jenis_kelamin: patient?.jenis_kelamin || f.jenis_kelamin,
         mst_penurunan_bb: lastScr?.mst_penurunan_bb !== undefined ? String(lastScr.mst_penurunan_bb) : f.mst_penurunan_bb,
         mst_nafsu_makan: lastScr?.mst_nafsu_makan !== undefined ? String(lastScr.mst_nafsu_makan) : f.mst_nafsu_makan,
@@ -994,9 +1023,21 @@ function AssessmentModal({ open, onClose, pid, userId, onSuccess }: { open: bool
           <Select label="Aktivitas" options={[{label:'TB (1.2)',value:'TB'},{label:'Ringan (1.3)',value:'RINGAN'},{label:'Sedang (1.4)',value:'SEDANG'}]} value={form.tingkat_aktivitas} onChange={e => setForm({...form, tingkat_aktivitas: e.target.value})} />
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <Select label="MST Q1" options={[{label:'Tidak (0)',value:'0'},{label:'1-5 kg (1)',value:'1'},{label:'>5 kg (2)',value:'2'}]} value={form.mst_penurunan_bb} onChange={e => setForm({...form, mst_penurunan_bb: e.target.value})} />
-          <Select label="MST Q2" options={[{label:'Baik (0)',value:'0'},{label:'Sedang (1)',value:'1'},{label:'Buruk (2)',value:'2'}]} value={form.mst_nafsu_makan} onChange={e => setForm({...form, mst_nafsu_makan: e.target.value})} />
+          <Select label="Aktivitas" options={[{label:'TB (1.2)',value:'TB'},{label:'Ringan (1.3)',value:'RINGAN'},{label:'Sedang (1.4)',value:'SEDANG'}]} value={form.tingkat_aktivitas} onChange={e => setForm({...form, tingkat_aktivitas: e.target.value})} />
         </div>
+        {form.bb && form.tb && Number(form.tb) > 0 && (
+          <div className="p-2 rounded-lg bg-[var(--color-primary-light)] text-xs text-[var(--color-primary)]">
+            IMT: {(Number(form.bb) / ((Number(form.tb) / 100) ** 2)).toFixed(1)}
+            {' — '}
+            {(() => {
+              const imt = Number(form.bb) / ((Number(form.tb) / 100) ** 2)
+              if (imt < 18.5) return 'Kurus'
+              if (imt < 25) return 'Normal'
+              if (imt < 30) return 'Gemuk'
+              return 'Obesitas'
+            })()}
+          </div>
+        )}
         <Input label="Diagnosis Medis (pisahkan dengan koma)" value={form.diagnosis_medis} onChange={e => setForm({...form, diagnosis_medis: e.target.value})} placeholder="DM Tipe 2, Hipertensi" />
         <Input label="Keluhan (pisahkan dengan koma)" value={form.keluhan} onChange={e => setForm({...form, keluhan: e.target.value})} placeholder="poliuria, polidipsi" />
         <div className="grid grid-cols-3 gap-2">
