@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updatePatientStatus } from '@/lib/rule-engine/state-updater'
+import { validate, interventionSchema } from '@/lib/validation'
+import { getSupabaseKey } from '@/lib/supabase-server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseKey = getSupabaseKey()
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -23,8 +25,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   try {
-    const raw = await request.text()
-    const body = JSON.parse(raw)
+    const body = await request.json()
+    const v = validate(interventionSchema, body)
+    if (!v.success) return v.response
     const res = await fetch(`${supabaseUrl}/rest/v1/interventions`, {
       method: 'POST',
       headers: {
@@ -33,17 +36,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       body: JSON.stringify({
         patient_id: id,
-        diagnosis_id: body.diagnosis_id || null,
-        jenis_diet: body.jenis_diet || null,
-        rute_pemberian: body.rute_pemberian || 'ORAL',
-        tujuan_intervensi: body.tujuan_intervensi || null,
-        target_energi: body.target_energi ? Number(body.target_energi) : null,
-        target_protein: body.target_protein ? Number(body.target_protein) : null,
-        alergi: body.alergi || null,
-        edukasi: body.edukasi || null,
-        alasan_revisi: body.alasan_revisi || null,
-        status: 'active',
-        created_by: body.created_by || null,
+        diagnosis_id: v.data.diagnosis_id || null,
+        jenis_diet: v.data.jenis_diet,
+        rute_pemberian: v.data.rute_pemberian,
+        tujuan_intervensi: v.data.tujuan_intervensi || null,
+        target_energi: v.data.target_energi ?? null,
+        target_protein: v.data.target_protein ?? null,
+        alergi: v.data.alergi || null,
+        edukasi: v.data.edukasi || null,
+        alasan_revisi: v.data.alasan_revisi || null,
+        status: v.data.status,
+        created_by: v.data.created_by || null,
       }),
     })
     if (!res.ok) {

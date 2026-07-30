@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ClipboardList, UtensilsCrossed, BookOpen, LayoutDashboard, LogIn, LogOut, Users } from 'lucide-react';
 import { AuthProvider } from '@/lib/auth-context';
 import { NavbarClient } from './navbar-client';
+import { ErrorBoundary } from '@/components/error-boundary';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,7 +16,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col">
         <AuthProvider>
           <NavbarClient />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1">
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </main>
         </AuthProvider>
       </body>
     </html>

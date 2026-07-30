@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updatePatientStatus } from '@/lib/rule-engine/state-updater'
 import { EVENTS } from '@/lib/rule-engine/patient-state'
+import { validate, updatePatientSchema } from '@/lib/validation'
+import { getSupabaseKey } from '@/lib/supabase-server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseKey = getSupabaseKey()
+
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  if (!uuidRegex.test(id)) return NextResponse.json({ detail: 'ID tidak valid' }, { status: 400 })
   try {
     const res = await fetch(`${supabaseUrl}/rest/v1/patients?id=eq.${id}&select=*`, {
       headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` },
@@ -23,10 +28,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  if (!uuidRegex.test(id)) return NextResponse.json({ detail: 'ID tidak valid' }, { status: 400 })
   try {
-    const raw = await request.text()
-    const body = JSON.parse(raw)
-    const { _action, ...updateBody } = body
+    const body = await request.json()
+    const v = validate(updatePatientSchema, body)
+    if (!v.success) return v.response
+    const { _action, ...updateBody } = v.data
 
     if (_action) {
       const eventKey = _action as keyof typeof EVENTS

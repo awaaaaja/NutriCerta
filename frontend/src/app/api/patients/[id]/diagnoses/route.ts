@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updatePatientStatus } from '@/lib/rule-engine/state-updater'
+import { validate, diagnosisSchema } from '@/lib/validation'
+import { getSupabaseKey } from '@/lib/supabase-server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseKey = getSupabaseKey()
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -23,8 +25,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   try {
-    const raw = await request.text()
-    const body = JSON.parse(raw)
+    const body = await request.json()
+    const v = validate(diagnosisSchema, body)
+    if (!v.success) return v.response
     const res = await fetch(`${supabaseUrl}/rest/v1/diagnoses`, {
       method: 'POST',
       headers: {
@@ -33,14 +36,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       body: JSON.stringify({
         patient_id: id,
-        assessment_id: body.assessment_id || null,
-        kode_pes: body.kode_pes,
-        pernyataan_pes: body.pernyataan_pes,
-        domain: body.domain || null,
-        etiologi: body.etiologi || null,
-        signs: body.signs || null,
-        status: 'active',
-        created_by: body.created_by || null,
+        assessment_id: v.data.assessment_id || null,
+        kode_pes: v.data.kode_pes,
+        pernyataan_pes: v.data.pernyataan_pes,
+        domain: v.data.domain || null,
+        etiologi: v.data.etiologi || null,
+        signs: v.data.signs || null,
+        status: v.data.status,
+        created_by: v.data.created_by || null,
       }),
     })
     if (!res.ok) {

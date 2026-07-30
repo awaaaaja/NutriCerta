@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getSupabaseKey } from '@/lib/supabase-server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseKey = getSupabaseKey()
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string; diagnosisId: string }> }) {
   const { diagnosisId } = await params

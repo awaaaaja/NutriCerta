@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updatePatientStatus } from '@/lib/rule-engine/state-updater'
+import { validate, screeningSchema } from '@/lib/validation'
+import { getSupabaseKey } from '@/lib/supabase-server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseKey = getSupabaseKey()
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -26,8 +28,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   try {
-    const raw = await request.text()
-    const body = JSON.parse(raw)
+    const body = await request.json()
+    const v = validate(screeningSchema, body)
+    if (!v.success) return v.response
     const res = await fetch(`${supabaseUrl}/rest/v1/screenings`, {
       method: 'POST',
       headers: {
@@ -36,10 +39,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       body: JSON.stringify({
         patient_id: id,
-        mst_penurunan_bb: body.mst_penurunan_bb != null ? Number(body.mst_penurunan_bb) : null,
-        mst_nafsu_makan: body.mst_nafsu_makan != null ? Number(body.mst_nafsu_makan) : null,
-        status: body.status || 'draft',
-        created_by: body.created_by || null,
+        mst_penurunan_bb: v.data.mst_penurunan_bb,
+        mst_nafsu_makan: v.data.mst_nafsu_makan,
+        status: v.data.status,
+        created_by: v.data.created_by || null,
       }),
     })
     if (!res.ok) {
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
     const data = await res.json()
 
-    const skor = (Number(body.mst_penurunan_bb) || 0) + (Number(body.mst_nafsu_makan) || 0)
+    const skor = v.data.mst_penurunan_bb + v.data.mst_nafsu_makan
     await updatePatientStatus(id, 'SKRINING_DILAKUKAN', { screeningSkor: skor })
 
     return NextResponse.json(data, { status: 201 })

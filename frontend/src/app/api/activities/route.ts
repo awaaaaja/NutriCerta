@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
+import { getSupabaseKey } from '@/lib/supabase-server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseKey = getSupabaseKey()
 
 async function fetchList(table: string, limit = 5) {
   const res = await fetch(`${supabaseUrl}/rest/v1/${table}?select=*,patient:patient_id(nama)&order=created_at.desc&limit=${limit}`, {

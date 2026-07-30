@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { validate, loginSchema } from '@/lib/validation'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const body = await request.json()
+    const v = validate(loginSchema, body)
+    if (!v.success) return v.response
+    const { email, password } = v.data
     const res = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
       method: 'POST',
       headers: { apikey: supabaseKey, 'Content-Type': 'application/json' },

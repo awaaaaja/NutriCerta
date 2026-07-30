@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { RuleEngine } from '@/lib/rule-engine/engine'
 import { PatientData } from '@/lib/rule-engine/models'
 import { updatePatientStatus } from '@/lib/rule-engine/state-updater'
+import { validate, assessmentSchema } from '@/lib/validation'
+import { getSupabaseKey } from '@/lib/supabase-server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseKey = getSupabaseKey()
 const engine = new RuleEngine()
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -29,22 +31,23 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   try {
-    const raw = await request.text()
-    const body = JSON.parse(raw)
+    const body = await request.json()
+    const v = validate(assessmentSchema, body)
+    if (!v.success) return v.response
 
     const patient: PatientData = {
-      usia: Number(body.usia) || 0,
-      bb: Number(body.bb) || 0,
-      tb: Number(body.tb) || 0,
-      jenis_kelamin: body.jenis_kelamin || 'wanita',
-      tingkat_aktivitas: body.tingkat_aktivitas || 'RINGAN',
-      mst_penurunan_bb: body.mst_penurunan_bb != null ? Number(body.mst_penurunan_bb) : null,
-      mst_nafsu_makan: body.mst_nafsu_makan != null ? Number(body.mst_nafsu_makan) : null,
-      diagnosis_medis: Array.isArray(body.diagnosis_medis) ? body.diagnosis_medis.map(String) : [],
-      keluhan: Array.isArray(body.keluhan) ? body.keluhan.map(String) : [],
-      asupan_persen: body.asupan_persen != null ? Number(body.asupan_persen) : null,
-      albumin: body.albumin != null ? Number(body.albumin) : null,
-      gds: body.gds != null ? Number(body.gds) : null,
+      usia: v.data.usia || 0,
+      bb: v.data.bb || 0,
+      tb: v.data.tb || 0,
+      jenis_kelamin: v.data.jenis_kelamin || 'wanita',
+      tingkat_aktivitas: v.data.tingkat_aktivitas || 'RINGAN',
+      mst_penurunan_bb: v.data.mst_penurunan_bb ?? null,
+      mst_nafsu_makan: v.data.mst_nafsu_makan ?? null,
+      diagnosis_medis: v.data.diagnosis_medis || [],
+      keluhan: v.data.keluhan || [],
+      asupan_persen: v.data.asupan_persen ?? null,
+      albumin: v.data.albumin ?? null,
+      gds: v.data.gds ?? null,
     }
 
     const result = engine.evaluate(patient)
@@ -73,8 +76,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         tee: result.kebutuhan?.tee != null ? Math.round(result.kebutuhan.tee) : null,
         protein_gram: result.kebutuhan?.protein != null ? Math.round(result.kebutuhan.protein) : null,
         hasil: result,
-        status: body.status || 'submitted',
-        created_by: body.created_by || null,
+        status: v.data.status || 'submitted',
+        created_by: v.data.created_by || null,
       }),
     })
     if (!res.ok) {

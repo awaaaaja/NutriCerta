@@ -281,9 +281,10 @@ export default function DashboardPage() {
               {' — '}
               {(() => {
                 const imt = Number(form.bb) / ((Number(form.tb) / 100) ** 2)
-                if (imt < 18.5) return 'Kurus'
-                if (imt < 25) return 'Normal'
-                if (imt < 30) return 'Gemuk'
+                if (imt < 17.0) return 'Sangat Kurang'
+                if (imt < 18.5) return 'Kurang'
+                if (imt <= 25.0) return 'Normal'
+                if (imt < 27.0) return 'Lebih'
                 return 'Obesitas'
               })()}
             </div>

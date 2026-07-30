@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updatePatientStatus } from '@/lib/rule-engine/state-updater'
+import { validate, monitoringSchema } from '@/lib/validation'
+import { getSupabaseKey } from '@/lib/supabase-server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseKey = getSupabaseKey()
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -23,8 +25,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   try {
-    const raw = await request.text()
-    const body = JSON.parse(raw)
+    const body = await request.json()
+    const v = validate(monitoringSchema, body)
+    if (!v.success) return v.response
     const res = await fetch(`${supabaseUrl}/rest/v1/monitoring_logs`, {
       method: 'POST',
       headers: {
@@ -33,15 +36,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       body: JSON.stringify({
         patient_id: id,
-        tanggal: body.tanggal || new Date().toISOString().split('T')[0],
-        bb: body.bb != null ? Number(body.bb) : null,
-        asupan_persen: body.asupan_persen != null ? Number(body.asupan_persen) : null,
-        albumin: body.albumin != null ? Number(body.albumin) : null,
-        gds: body.gds != null ? Number(body.gds) : null,
-        mual_muntah: body.mual_muntah || null,
-        diare: body.diare || null,
-        catatan: body.catatan || null,
-        created_by: body.created_by || null,
+        tanggal: v.data.tanggal || new Date().toISOString().split('T')[0],
+        bb: v.data.bb ?? null,
+        asupan_persen: v.data.asupan_persen ?? null,
+        albumin: v.data.albumin ?? null,
+        gds: v.data.gds ?? null,
+        mual_muntah: v.data.mual_muntah || null,
+        diare: v.data.diare || null,
+        catatan: v.data.catatan || null,
+        created_by: v.data.created_by || null,
       }),
     })
     if (!res.ok) {

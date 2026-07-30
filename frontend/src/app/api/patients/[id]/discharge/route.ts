@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updatePatientStatus } from '@/lib/rule-engine/state-updater'
+import { validate, dischargeSchema } from '@/lib/validation'
+import { getSupabaseKey } from '@/lib/supabase-server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseKey = getSupabaseKey()
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -24,17 +26,18 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   try {
-    const raw = await request.text()
-    const body = JSON.parse(raw)
+    const body = await request.json()
+    const v = validate(dischargeSchema, body)
+    if (!v.success) return v.response
     const res = await fetch(`${supabaseUrl}/rest/v1/discharge_summaries?patient_id=eq.${id}`, {
       method: 'PATCH',
       headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        rekomendasi_diet: body.rekomendasi_diet || null,
-        monitoring_lanjutan: body.monitoring_lanjutan || null,
-        kontrol_tanggal: body.kontrol_tanggal || null,
-        catatan: body.catatan || null,
-        created_by: body.created_by || null,
+        rekomendasi_diet: v.data.rekomendasi_diet || null,
+        monitoring_lanjutan: v.data.monitoring_lanjutan || null,
+        kontrol_tanggal: v.data.kontrol_tanggal || null,
+        catatan: v.data.catatan || null,
+        created_by: v.data.created_by || null,
         updated_at: new Date().toISOString(),
       }),
     })
@@ -52,8 +55,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   try {
-    const raw = await request.text()
-    const body = JSON.parse(raw)
+    const body = await request.json()
+    const v = validate(dischargeSchema, body)
+    if (!v.success) return v.response
     const res = await fetch(`${supabaseUrl}/rest/v1/discharge_summaries`, {
       method: 'POST',
       headers: {
@@ -62,11 +66,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       body: JSON.stringify({
         patient_id: id,
-        rekomendasi_diet: body.rekomendasi_diet || null,
-        monitoring_lanjutan: body.monitoring_lanjutan || null,
-        kontrol_tanggal: body.kontrol_tanggal || null,
-        catatan: body.catatan || null,
-        created_by: body.created_by || null,
+        rekomendasi_diet: v.data.rekomendasi_diet || null,
+        monitoring_lanjutan: v.data.monitoring_lanjutan || null,
+        kontrol_tanggal: v.data.kontrol_tanggal || null,
+        catatan: v.data.catatan || null,
+        created_by: v.data.created_by || null,
       }),
     })
     if (!res.ok) {

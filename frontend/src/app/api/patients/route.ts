@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { validate, createPatientSchema } from '@/lib/validation'
+import { getSupabaseKey } from '@/lib/supabase-server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseKey = getSupabaseKey()
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -40,27 +42,21 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const bodyText = await request.text()
-    if (!bodyText || bodyText.trim().length === 0) {
-      return NextResponse.json({ detail: 'Body kosong', received: bodyText }, { status: 400 })
-    }
-    let body: Record<string, any>
-    try {
-      body = JSON.parse(bodyText)
-    } catch (e) {
-      return NextResponse.json({ detail: 'JSON tidak valid', received: bodyText.substring(0, 500) }, { status: 400 })
-    }
+    const body = await request.json()
+    const v = validate(createPatientSchema, body)
+    if (!v.success) return v.response
 
-    const bb = body.bb ? Number(body.bb) : null
-    const tb = body.tb ? Number(body.tb) : null
+    const bb = v.data.bb ?? null
+    const tb = v.data.tb ?? null
     let imt: number | null = null
     let imt_kategori: string | null = null
     if (bb && tb && tb > 0) {
       const tbM = tb / 100
       imt = Math.round((bb / (tbM * tbM)) * 10) / 10
-      if (imt < 18.5) imt_kategori = 'KURUS'
-      else if (imt < 25) imt_kategori = 'NORMAL'
-      else if (imt < 30) imt_kategori = 'GEMUK'
+      if (imt < 17.0) imt_kategori = 'SANGAT_KURANG'
+      else if (imt < 18.5) imt_kategori = 'KURANG'
+      else if (imt <= 25.0) imt_kategori = 'NORMAL'
+      else if (imt < 27.0) imt_kategori = 'LEBIH'
       else imt_kategori = 'OBESITAS'
     }
 
@@ -73,19 +69,19 @@ export async function POST(request: NextRequest) {
         Prefer: 'return=representation',
       },
       body: JSON.stringify({
-        no_rm: body.no_rm,
-        nama: body.nama,
-        tanggal_lahir: body.tanggal_lahir || null,
-        jenis_kelamin: body.jenis_kelamin || null,
-        ruangan: body.ruangan || null,
-        diagnosis_masuk: body.diagnosis_masuk || null,
-        tgl_masuk: body.tgl_masuk || new Date().toISOString().split('T')[0],
+        no_rm: v.data.no_rm,
+        nama: v.data.nama,
+        tanggal_lahir: v.data.tanggal_lahir || null,
+        jenis_kelamin: v.data.jenis_kelamin || null,
+        ruangan: v.data.ruangan || null,
+        diagnosis_masuk: v.data.diagnosis_masuk || null,
+        tgl_masuk: v.data.tgl_masuk || new Date().toISOString().split('T')[0],
         bb: bb,
         tb: tb,
         imt: imt,
         imt_kategori: imt_kategori,
         status_pagt: 'BARU_MASUK',
-        created_by: body.created_by || null,
+        created_by: v.data.created_by || null,
       }),
     })
     if (!res.ok) {

@@ -1022,18 +1022,17 @@ function AssessmentModal({ open, onClose, pid, userId, onSuccess }: { open: bool
           <Select label="JK" options={[{label:'Pria',value:'pria'},{label:'Wanita',value:'wanita'}]} value={form.jenis_kelamin} onChange={e => setForm({...form, jenis_kelamin: e.target.value})} />
           <Select label="Aktivitas" options={[{label:'TB (1.2)',value:'TB'},{label:'Ringan (1.3)',value:'RINGAN'},{label:'Sedang (1.4)',value:'SEDANG'}]} value={form.tingkat_aktivitas} onChange={e => setForm({...form, tingkat_aktivitas: e.target.value})} />
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <Select label="Aktivitas" options={[{label:'TB (1.2)',value:'TB'},{label:'Ringan (1.3)',value:'RINGAN'},{label:'Sedang (1.4)',value:'SEDANG'}]} value={form.tingkat_aktivitas} onChange={e => setForm({...form, tingkat_aktivitas: e.target.value})} />
-        </div>
+
         {form.bb && form.tb && Number(form.tb) > 0 && (
           <div className="p-2 rounded-lg bg-[var(--color-primary-light)] text-xs text-[var(--color-primary)]">
             IMT: {(Number(form.bb) / ((Number(form.tb) / 100) ** 2)).toFixed(1)}
             {' — '}
             {(() => {
               const imt = Number(form.bb) / ((Number(form.tb) / 100) ** 2)
-              if (imt < 18.5) return 'Kurus'
-              if (imt < 25) return 'Normal'
-              if (imt < 30) return 'Gemuk'
+              if (imt < 17.0) return 'Sangat Kurang'
+              if (imt < 18.5) return 'Kurang'
+              if (imt <= 25.0) return 'Normal'
+              if (imt < 27.0) return 'Lebih'
               return 'Obesitas'
             })()}
           </div>

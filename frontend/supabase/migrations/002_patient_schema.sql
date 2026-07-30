@@ -172,51 +172,73 @@ ALTER TABLE monitoring_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE discharge_summaries ENABLE ROW LEVEL SECURITY;
 
 -- Authenticated users can read all
+DROP POLICY IF EXISTS "Authenticated users can read patients" ON patients;
 CREATE POLICY "Authenticated users can read patients"
     ON patients FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Authenticated users can read screenings" ON screenings;
 CREATE POLICY "Authenticated users can read screenings"
     ON screenings FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Authenticated users can read assessments" ON assessments;
 CREATE POLICY "Authenticated users can read assessments"
     ON assessments FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Authenticated users can read diagnoses" ON diagnoses;
 CREATE POLICY "Authenticated users can read diagnoses"
     ON diagnoses FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Authenticated users can read interventions" ON interventions;
 CREATE POLICY "Authenticated users can read interventions"
     ON interventions FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Authenticated users can read monitoring_logs" ON monitoring_logs;
 CREATE POLICY "Authenticated users can read monitoring_logs"
     ON monitoring_logs FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Authenticated users can read discharge_summaries" ON discharge_summaries;
 CREATE POLICY "Authenticated users can read discharge_summaries"
     ON discharge_summaries FOR SELECT TO authenticated USING (true);
 
--- Authenticated users can insert/update their own
+-- Authenticated users can insert/update
+DROP POLICY IF EXISTS "Authenticated users can insert patients" ON patients;
 CREATE POLICY "Authenticated users can insert patients"
     ON patients FOR INSERT TO authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Authenticated users can update patients" ON patients;
 CREATE POLICY "Authenticated users can update patients"
     ON patients FOR UPDATE TO authenticated USING (true);
+DROP POLICY IF EXISTS "Authenticated users can insert screenings" ON screenings;
 CREATE POLICY "Authenticated users can insert screenings"
     ON screenings FOR INSERT TO authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Authenticated users can insert assessments" ON assessments;
 CREATE POLICY "Authenticated users can insert assessments"
     ON assessments FOR INSERT TO authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Authenticated users can insert diagnoses" ON diagnoses;
 CREATE POLICY "Authenticated users can insert diagnoses"
     ON diagnoses FOR INSERT TO authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Authenticated users can insert interventions" ON interventions;
 CREATE POLICY "Authenticated users can insert interventions"
     ON interventions FOR INSERT TO authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Authenticated users can insert monitoring_logs" ON monitoring_logs;
 CREATE POLICY "Authenticated users can insert monitoring_logs"
     ON monitoring_logs FOR INSERT TO authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Authenticated users can insert discharge_summaries" ON discharge_summaries;
 CREATE POLICY "Authenticated users can insert discharge_summaries"
     ON discharge_summaries FOR INSERT TO authenticated WITH CHECK (true);
 
--- Anon can read (for public API routes that need auth check)
+-- Anon can read (for public API routes)
+DROP POLICY IF EXISTS "Anon can read patients" ON patients;
 CREATE POLICY "Anon can read patients"
     ON patients FOR SELECT TO anon USING (true);
+DROP POLICY IF EXISTS "Anon can read screenings" ON screenings;
 CREATE POLICY "Anon can read screenings"
     ON screenings FOR SELECT TO anon USING (true);
+DROP POLICY IF EXISTS "Anon can read assessments" ON assessments;
 CREATE POLICY "Anon can read assessments"
     ON assessments FOR SELECT TO anon USING (true);
+DROP POLICY IF EXISTS "Anon can read diagnoses" ON diagnoses;
 CREATE POLICY "Anon can read diagnoses"
     ON diagnoses FOR SELECT TO anon USING (true);
+DROP POLICY IF EXISTS "Anon can read interventions" ON interventions;
 CREATE POLICY "Anon can read interventions"
     ON interventions FOR SELECT TO anon USING (true);
+DROP POLICY IF EXISTS "Anon can read monitoring_logs" ON monitoring_logs;
 CREATE POLICY "Anon can read monitoring_logs"
     ON monitoring_logs FOR SELECT TO anon USING (true);
+DROP POLICY IF EXISTS "Anon can read discharge_summaries" ON discharge_summaries;
 CREATE POLICY "Anon can read discharge_summaries"
     ON discharge_summaries FOR SELECT TO anon USING (true);
